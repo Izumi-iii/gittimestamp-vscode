@@ -1,0 +1,111 @@
+{
+  "name": "gittimestamp",
+  "displayName": "GitTimeStamp",
+  "description": "Enhance your git workflow by automatically adding timestamps to commit messages, making it easier to track when changes were made",
+  "version": "0.0.1",
+  "publisher": "tkzzzzzz6",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tkzzzzzz6/gittimestamp.git"
+  },
+  "homepage": "https://github.com/tkzzzzzz6/gittimestamp#readme",
+  "bugs": {
+    "url": "https://github.com/tkzzzzzz6/gittimestamp/issues"
+  },
+  "keywords": [
+    "git",
+    "commit",
+    "timestamp",
+    "scm",
+    "时间戳",
+    "提交"
+  ],
+  "engines": {
+    "vscode": "^1.103.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "extensionDependencies": [
+    "vscode.git"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "smartCommit.prefill",
+        "title": "预填充提交消息",
+        "category": "Git"
+      },
+      {
+        "command": "smartCommit.commit",
+        "title": "一键提交",
+        "category": "Git"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "smartCommit.prefill",
+          "when": "gitOpenRepository"
+        },
+        {
+          "command": "smartCommit.commit",
+          "when": "gitOpenRepository"
+        }
+      ],
+      "scm/title": [
+        {
+          "command": "smartCommit.prefill",
+          "group": "navigation",
+          "when": "scmProvider == git"
+        },
+        {
+          "command": "smartCommit.commit",
+          "group": "navigation",
+          "when": "scmProvider == git"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Smart Commit",
+      "properties": {
+        "smartCommit.format": {
+          "type": "string",
+          "default": "[${user}] - ${yyyy}-${MM}-${dd} ${HH}:${mm}:${ss}",
+          "description": "提交消息格式模板"
+        },
+        "smartCommit.timezone": {
+          "type": "string",
+          "default": "local",
+          "description": "时区设置 (local/UTC)"
+        },
+        "smartCommit.stageAllBeforeCommit": {
+          "type": "boolean",
+          "default": false,
+          "description": "提交前是否自动暂存所有文件"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.103.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@typescript-eslint/eslint-plugin": "^8.42.0",
+    "@typescript-eslint/parser": "^8.42.0",
+    "eslint": "^9.34.0",
+    "typescript": "^5.9.2",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}
