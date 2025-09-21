@@ -130,27 +130,79 @@ export function activate(context: vscode.ExtensionContext) {
 				return;
 			}
 
+			// 获取工作目录
+			const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+			if (!workspacePath) {
+				vscode.window.showErrorMessage('无法获取工作目录');
+				return;
+			}
+			
+			// 验证工作目录是否是Git仓库
+			try {
+				await execFileAsync('git', ['rev-parse', '--git-dir'], { cwd: workspacePath });
+			} catch (error) {
+				vscode.window.showErrorMessage(`当前目录不是Git仓库: ${workspacePath}`);
+				return;
+			}
+
 			// 获取配置
 			const config = vscode.workspace.getConfiguration('smartCommit');
 			const stageAll = config.get<boolean>('stageAllBeforeCommit', false);
 
 			// 如果需要，先暂存所有文件
 			if (stageAll) {
+				console.log('暂存所有文件...');
 				await execFileAsync('git', ['add', '.'], { 
-					cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath 
+					cwd: workspacePath 
 				});
 			}
 
 			// 构建消息
 			const message = await buildMessage();
+			console.log('提交消息:', message);
 			
 			// 执行提交
-			await execFileAsync('git', ['commit', '-m', message], { 
-				cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath 
-			});
-
+			console.log('执行Git提交命令...');
+			console.log('提交消息内容:', JSON.stringify(message));
+			console.log('工作目录:', workspacePath);
+			
+			// 使用临时文件来避免命令行参数问题
+			const tempFile = require('path').join(workspacePath, '.git-commit-msg.tmp');
+			console.log('临时文件路径:', tempFile);
+			
+			try {
+				require('fs').writeFileSync(tempFile, message, 'utf8');
+				console.log('临时文件创建成功');
+				
+				// 验证文件是否存在
+				if (!require('fs').existsSync(tempFile)) {
+					throw new Error('临时文件创建失败');
+				}
+				
+				const result = await execFileAsync('git', ['commit', '-F', tempFile], { 
+					cwd: workspacePath,
+					encoding: 'utf8',
+					timeout: 10000
+				});
+				console.log('Git提交成功:', result);
+			} catch (error) {
+				console.error('提交过程中出错:', error);
+				throw error;
+			} finally {
+				// 清理临时文件
+				try {
+					if (require('fs').existsSync(tempFile)) {
+						require('fs').unlinkSync(tempFile);
+						console.log('临时文件已清理');
+					}
+				} catch (e) {
+					console.error('清理临时文件失败:', e);
+				}
+			}
+			
 			vscode.window.showInformationMessage('提交成功！');
 		} catch (error) {
+			console.error('提交失败详情:', error);
 			vscode.window.showErrorMessage(`提交失败: ${error}`);
 		}
 	});

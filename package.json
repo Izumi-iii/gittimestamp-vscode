@@ -1,3 +1,4 @@
+
 {
   "name": "gittimestamp",
   "displayName": "GitTimeStamp",
@@ -29,7 +30,9 @@
   "extensionDependencies": [
     "vscode.git"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -47,12 +50,10 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "smartCommit.prefill",
-          "when": "gitOpenRepository"
+          "command": "smartCommit.prefill"
         },
         {
-          "command": "smartCommit.commit",
-          "when": "gitOpenRepository"
+          "command": "smartCommit.commit"
         }
       ],
       "scm/title": [
